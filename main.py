@@ -9,104 +9,121 @@ class LentesApp:
         self.sistema = SistemaLentes()
         self.root = root
         self.root.title("Calculadora de Lentes")
-        self.root.geometry("600x550")  # Aumentando o tamanho da janela
+        self.root.geometry("1000x600")  # Ajustando o tamanho da janela
         self.root.configure(bg='#2F4F4F')  # Dark Green Background
-        
+
         # Estilos
         self.style = ttk.Style()
         self.style.configure('TLabel', background='#2F4F4F', foreground='#FFD700', font=('Arial', 12))
         self.style.configure('TCombobox', font=('Arial', 12))
-        
-        # Frame principal
-        self.frame = tk.Frame(root, bg='#2F4F4F')
-        self.frame.pack(padx=20, pady=20, anchor='w')
 
-        # Categorias
-        self.categoria_label = ttk.Label(self.frame, text="Categoria de Lentes")
-        self.categoria_label.grid(row=0, column=0, padx=10, pady=10, sticky='w')
-        
-        self.categoria_var = tk.StringVar()
-        self.categoria_menu = ttk.Combobox(self.frame, textvariable=self.categoria_var, state='readonly', width=40)
-        self.categoria_menu['values'] = ["Visão Simples", "Progressiva"]
-        self.categoria_menu.grid(row=0, column=1, padx=10, pady=10, sticky='w')
-        self.categoria_menu.bind('<<ComboboxSelected>>', self.update_tipos_lentes)
+        # Molduras
+        self.od_frame = tk.LabelFrame(root, text="OD", bg='#2F4F4F', fg='#FFD700', font=('Arial', 14, 'bold'), padx=20, pady=20)
+        self.od_frame.place(x=50, y=20, width=400, height=300)
 
-        # Tipos de Lentes
-        self.tipo_lente_label = ttk.Label(self.frame, text="Tipo de Lente")
-        self.tipo_lente_label.grid(row=1, column=0, padx=10, pady=10, sticky='w')
-        
-        self.tipo_lente_var = tk.StringVar()
-        self.tipo_lente_menu = ttk.Combobox(self.frame, textvariable=self.tipo_lente_var, state='readonly', width=40)
-        self.tipo_lente_menu.grid(row=1, column=1, padx=10, pady=10, sticky='w')
-        self.tipo_lente_menu.bind('<<ComboboxSelected>>', self.update_opcoes_lentes)
-        
-        # Esférico
-        self.esferico_label = ttk.Label(self.frame, text="Valor Esférico")
-        self.esferico_label.grid(row=2, column=0, padx=10, pady=10, sticky='w')
-        
-        self.esferico_var = tk.StringVar()
-        self.esferico_menu = ttk.Combobox(self.frame, textvariable=self.esferico_var, state='readonly', width=40)
-        self.esferico_menu.grid(row=2, column=1, padx=10, pady=10, sticky='w')
-        
-        # Cilíndrico
-        self.cilindrico_label = ttk.Label(self.frame, text="Valor Cilíndrico")
-        self.cilindrico_label.grid(row=3, column=0, padx=10, pady=10, sticky='w')
-        
-        self.cilindrico_var = tk.StringVar()
-        self.cilindrico_menu = ttk.Combobox(self.frame, textvariable=self.cilindrico_var, state='readonly', width=40)
-        self.cilindrico_menu.grid(row=3, column=1, padx=10, pady=10, sticky='w')
-        
-        # Adição
-        self.adicao_label = ttk.Label(self.frame, text="Valor de Adição")
-        self.adicao_label.grid(row=4, column=0, padx=10, pady=10, sticky='w')
-        
-        self.adicao_var = tk.StringVar()
-        self.adicao_menu = ttk.Combobox(self.frame, textvariable=self.adicao_var, state='readonly', width=40)
-        self.adicao_menu.grid(row=4, column=1, padx=10, pady=10, sticky='w')
-        
+        self.oe_frame = tk.LabelFrame(root, text="OE", bg='#2F4F4F', fg='#FFD700', font=('Arial', 14, 'bold'), padx=20, pady=20)
+        self.oe_frame.place(x=550, y=20, width=400, height=300)
+
+        self.create_widgets(self.od_frame, 'od')
+        self.create_widgets(self.oe_frame, 'oe')
+
         # Incluir Armação
-        self.armacao_label = ttk.Label(self.frame, text="Incluir Armação")
-        self.armacao_label.grid(row=5, column=0, padx=10, pady=10, sticky='w')
-
-        self.armacao_frame = tk.Frame(self.frame, bg='#2F4F4F')
-        self.armacao_frame.grid(row=5, column=1, padx=10, pady=10, sticky='w')
-
+        self.armacao_label = ttk.Label(root, text="Incluir Armação")
+        self.armacao_label.place(x=420, y=350)
         self.armacao_var = tk.StringVar(value="Não")
-        self.armacao_sim = tk.Radiobutton(self.armacao_frame, text="Sim", variable=self.armacao_var, value="Sim", bg='#2F4F4F', fg='#FFD700', font=('Arial', 12))
-        self.armacao_nao = tk.Radiobutton(self.armacao_frame, text="Não", variable=self.armacao_var, value="Não", bg='#2F4F4F', fg='#FFD700', font=('Arial', 12))
-        self.armacao_sim.grid(row=0, column=0, padx=5)
-        self.armacao_nao.grid(row=0, column=1, padx=5)
-        
-        # Botões
-        self.buttons_frame = tk.Frame(root, bg='#2F4F4F')
-        self.buttons_frame.pack(pady=20)
-        
-        self.calcular_button = tk.Button(self.buttons_frame, text="Calcular", command=self.calcular_preco, bg='#006400', fg='#FFD700', font=('Arial', 12, 'bold'))
-        self.calcular_button.grid(row=0, column=0, padx=57)
-        
-        self.refazer_button = tk.Button(self.buttons_frame, text="Refazer", command=self.resetar_opcoes, bg='#006400', fg='#FFD700', font=('Arial', 12, 'bold'))
-        self.refazer_button.grid(row=0, column=1, padx=57)
+        self.armacao_sim = tk.Radiobutton(root, text="Sim", variable=self.armacao_var, value="Sim", bg='#2F4F4F', fg='#FFD700', font=('Arial', 12))
+        self.armacao_nao = tk.Radiobutton(root, text="Não", variable=self.armacao_var, value="Não", bg='#2F4F4F', fg='#FFD700', font=('Arial', 12))
+        self.armacao_sim.place(x=550, y=350)
+        self.armacao_nao.place(x=610, y=350)
         
         # Resultado
         self.resultado_label = ttk.Label(root, text="", font=("Arial", 14, "bold"))
-        self.resultado_label.pack(pady=10)
+        self.resultado_label.place(x=420, y=380)
 
-    def update_tipos_lentes(self, event):
-        categoria = self.categoria_var.get()
-        if categoria == "Visão Simples":
-            self.tipo_lente_menu['values'] = [lente.nome for lente in self.sistema.categorias["visao_simples"].lentes.values()]
-            self.adicao_menu.config(state='disabled')
-            self.cilindrico_menu.config(state='normal')
-        else:
-            self.tipo_lente_menu['values'] = [lente.nome for lente in self.sistema.categorias["progressiva"].lentes.values()]
-            self.adicao_menu.config(state='normal')
-            self.cilindrico_menu.config(state='disabled')
-        self.tipo_lente_var.set('')
-        self.update_opcoes_lentes(None)
+        # Botões
+        self.calcular_button = tk.Button(root, text="Calcular", command=self.calcular_preco, bg='#006400', fg='#FFD700', font=('Arial', 12, 'bold'))
+        self.calcular_button.place(x=420, y=420)
+
+        self.refazer_button = tk.Button(root, text="Refazer", command=self.resetar_opcoes, bg='#006400', fg='#FFD700', font=('Arial', 12, 'bold'))
+        self.refazer_button.place(x=530, y=420)
+
+    def create_widgets(self, frame, prefix):
+        # Categorias
+        categoria_label = ttk.Label(frame, text="Categoria de Lentes")
+        categoria_label.grid(row=0, column=0, padx=10, pady=10, sticky='w')
         
-    def update_opcoes_lentes(self, event):
-        categoria = self.categoria_var.get()
-        tipo_lente_nome = self.tipo_lente_var.get()
+        categoria_var = tk.StringVar()
+        categoria_menu = ttk.Combobox(frame, textvariable=categoria_var, state='readonly', width=30)
+        categoria_menu['values'] = ["Visão Simples", "Progressiva"]
+        categoria_menu.grid(row=0, column=1, padx=10, pady=10, sticky='w')
+        categoria_menu.bind('<<ComboboxSelected>>', lambda event: self.update_tipos_lentes(event, prefix))
+
+        setattr(self, f"{prefix}_categoria_var", categoria_var)
+        setattr(self, f"{prefix}_categoria_menu", categoria_menu)
+
+        # Tipos de Lentes
+        tipo_lente_label = ttk.Label(frame, text="Tipo de Lente")
+        tipo_lente_label.grid(row=1, column=0, padx=10, pady=10, sticky='w')
+        
+        tipo_lente_var = tk.StringVar()
+        tipo_lente_menu = ttk.Combobox(frame, textvariable=tipo_lente_var, state='readonly', width=30)
+        tipo_lente_menu.grid(row=1, column=1, padx=10, pady=10, sticky='w')
+        tipo_lente_menu.bind('<<ComboboxSelected>>', lambda event: self.update_opcoes_lentes(event, prefix))
+
+        setattr(self, f"{prefix}_tipo_lente_var", tipo_lente_var)
+        setattr(self, f"{prefix}_tipo_lente_menu", tipo_lente_menu)
+
+        # Esférico
+        esferico_label = ttk.Label(frame, text="Valor Esférico")
+        esferico_label.grid(row=2, column=0, padx=10, pady=10, sticky='w')
+        
+        esferico_var = tk.StringVar()
+        esferico_menu = ttk.Combobox(frame, textvariable=esferico_var, state='readonly', width=30)
+        esferico_menu.grid(row=2, column=1, padx=10, pady=10, sticky='w')
+
+        setattr(self, f"{prefix}_esferico_var", esferico_var)
+        setattr(self, f"{prefix}_esferico_menu", esferico_menu)
+
+        # Cilíndrico
+        cilindrico_label = ttk.Label(frame, text="Valor Cilíndrico")
+        cilindrico_label.grid(row=3, column=0, padx=10, pady=10, sticky='w')
+        
+        cilindrico_var = tk.StringVar()
+        cilindrico_menu = ttk.Combobox(frame, textvariable=cilindrico_var, state='readonly', width=30)
+        cilindrico_menu.grid(row=3, column=1, padx=10, pady=10, sticky='w')
+
+        setattr(self, f"{prefix}_cilindrico_var", cilindrico_var)
+        setattr(self, f"{prefix}_cilindrico_menu", cilindrico_menu)
+
+        # Adição
+        adicao_label = ttk.Label(frame, text="Valor de Adição")
+        adicao_label.grid(row=4, column=0, padx=10, pady=10, sticky='w')
+        
+        adicao_var = tk.StringVar()
+        adicao_menu = ttk.Combobox(frame, textvariable=adicao_var, state='readonly', width=30)
+        adicao_menu.grid(row=4, column=1, padx=10, pady=10, sticky='w')
+
+        setattr(self, f"{prefix}_adicao_var", adicao_var)
+        setattr(self, f"{prefix}_adicao_menu", adicao_menu)
+
+    def update_tipos_lentes(self, event, prefix):
+        categoria = getattr(self, f"{prefix}_categoria_var").get()
+        tipo_lente_menu = getattr(self, f"{prefix}_tipo_lente_menu")
+
+        if categoria == "Visão Simples":
+            tipo_lente_menu['values'] = [lente.nome for lente in self.sistema.categorias["visao_simples"].lentes.values()]
+            getattr(self, f"{prefix}_adicao_menu").config(state='disabled')
+            getattr(self, f"{prefix}_cilindrico_menu").config(state='normal')
+        else:
+            tipo_lente_menu['values'] = [lente.nome for lente in self.sistema.categorias["progressiva"].lentes.values()]
+            getattr(self, f"{prefix}_adicao_menu").config(state='normal')
+            getattr(self, f"{prefix}_cilindrico_menu").config(state='disabled')
+        getattr(self, f"{prefix}_tipo_lente_var").set('')
+        self.update_opcoes_lentes(None, prefix)
+        
+    def update_opcoes_lentes(self, event, prefix):
+        categoria = getattr(self, f"{prefix}_categoria_var").get()
+        tipo_lente_nome = getattr(self, f"{prefix}_tipo_lente_var").get()
         
         if categoria == "Visão Simples":
             categoria_key = "visao_simples"
@@ -117,79 +134,70 @@ class LentesApp:
         
         if tipo_lente:
             esferico_values = [str(v) for v in self.range_float(tipo_lente.esferico_range[0], tipo_lente.esferico_range[1])]
-            self.esferico_menu['values'] = esferico_values
-            self.esferico_var.set('')
+            getattr(self, f"{prefix}_esferico_menu")['values'] = esferico_values
+            getattr(self, f"{prefix}_esferico_var").set('')
             
             if categoria == "Visão Simples":
                 cilindrico_values = [str(v) for v in self.range_float(tipo_lente.cilindrico_range[0], tipo_lente.cilindrico_range[1])]
-                self.cilindrico_menu['values'] = cilindrico_values
-                self.cilindrico_var.set('')
-                self.cilindrico_menu.config(state='readonly')
+                getattr(self, f"{prefix}_cilindrico_menu")['values'] = cilindrico_values
+                getattr(self, f"{prefix}_cilindrico_var").set('')
+                getattr(self, f"{prefix}_cilindrico_menu").config(state='readonly')
             else:
-                self.cilindrico_menu['values'] = []
-                self.cilindrico_var.set('')
-                self.cilindrico_menu.config(state='disabled')
+                getattr(self, f"{prefix}_cilindrico_menu")['values'] = []
+                getattr(self, f"{prefix}_cilindrico_var").set('')
+                getattr(self, f"{prefix}_cilindrico_menu").config(state='disabled')
                 
             if categoria == "Progressiva":
                 adicao_values = [str(v) for v in self.range_float(tipo_lente.adicao_range[0], tipo_lente.adicao_range[1])]
-                self.adicao_menu['values'] = adicao_values
-                self.adicao_var.set('')
-                self.adicao_menu.config(state='readonly')
+                getattr(self, f"{prefix}_adicao_menu")['values'] = adicao_values
+                getattr(self, f"{prefix}_adicao_var").set('')
+                getattr(self, f"{prefix}_adicao_menu").config(state='readonly')
             else:
-                self.adicao_menu['values'] = []
-                self.adicao_var.set('')
-                self.adicao_menu.config(state='disabled')
+                getattr(self, f"{prefix}_adicao_menu")['values'] = []
+                getattr(self, f"{prefix}_adicao_var").set('')
+                getattr(self, f"{prefix}_adicao_menu").config(state='disabled')
 
     def calcular_preco(self):
-        categoria = self.categoria_var.get()
-        tipo_lente_nome = self.tipo_lente_var.get()
-        esferico = self.esferico_var.get()
-        cilindrico = self.cilindrico_var.get()
-        adicao = self.adicao_var.get()
-
         try:
-            esferico = float(esferico)
-            if categoria == "Visão Simples":
-                cilindrico = float(cilindrico)
-            if categoria == "Progressiva":
-                adicao = float(adicao)
-        except ValueError:
-            messagebox.showerror("Erro de entrada", "Por favor, insira valores numéricos válidos para esférico, cilíndrico e adição.")
-            return
+            od_tipo_lente_nome = self.od_tipo_lente_var.get()
+            oe_tipo_lente_nome = self.oe_tipo_lente_var.get()
+            
+            od_tipo_lente = next((v for k, v in self.sistema.categorias["visao_simples"].lentes.items() if v.nome == od_tipo_lente_nome), None) or \
+                            next((v for k, v in self.sistema.categorias["progressiva"].lentes.items() if v.nome == od_tipo_lente_nome), None)
+            
+            oe_tipo_lente = next((v for k, v in self.sistema.categorias["visao_simples"].lentes.items() if v.nome == oe_tipo_lente_nome), None) or \
+                            next((v for k, v in self.sistema.categorias["progressiva"].lentes.items() if v.nome == oe_tipo_lente_nome), None)
+            
+            if not od_tipo_lente or not oe_tipo_lente:
+                raise ValueError("Tipo de lente não encontrado.")
 
-        if categoria == "Visão Simples":
-            categoria_key = "visao_simples"
-            adicao = None
-        else:
-            categoria_key = "progressiva"
-            cilindrico = None
-
-        tipo_lente = next((v for k, v in self.sistema.categorias[categoria_key].lentes.items() if v.nome == tipo_lente_nome), None)
-
-        if tipo_lente is not None:
-            preco_debito = (tipo_lente.debito + 40) * 3.5  # Aplicando a fórmula: valor + 40 e depois acrescido de 350%
-            preco_credito = (tipo_lente.credito + 40) * 4  # Aplicando a fórmula: valor da tabela + 40 e depois acrescido de 400%
+            preco_debito = ((od_tipo_lente.debito + oe_tipo_lente.debito) / 2 + 40) * 4.5
+            preco_credito = ((od_tipo_lente.credito + oe_tipo_lente.credito) / 2 + 40) * 5
+            
             if self.armacao_var.get() == "Sim":
                 preco_debito += 100.00
-                preco_credito += 110.00 
+                preco_credito += 110.00
+
             preco_text = f"Preço (Débito): R$ {preco_debito:.2f}, Preço (Crédito): R$ {preco_credito:.2f}"
             self.resultado_label.config(text=preco_text)
-        else:
-            messagebox.showerror("Erro", "Tipo de lente não encontrado.")
+        except Exception as e:
+            messagebox.showerror("Erro", str(e))
     
     def resetar_opcoes(self):
-        self.categoria_var.set('')
-        self.tipo_lente_var.set('')
-        self.esferico_var.set('')
-        self.cilindrico_var.set('')
-        self.adicao_var.set('')
+        for prefix in ["od", "oe"]:
+            getattr(self, f"{prefix}_categoria_var").set('')
+            getattr(self, f"{prefix}_tipo_lente_var").set('')
+            getattr(self, f"{prefix}_esferico_var").set('')
+            getattr(self, f"{prefix}_cilindrico_var").set('')
+            getattr(self, f"{prefix}_adicao_var").set('')
+            getattr(self, f"{prefix}_esferico_menu")['values'] = []
+            getattr(self, f"{prefix}_cilindrico_menu")['values'] = []
+            getattr(self, f"{prefix}_adicao_menu")['values'] = []
+            getattr(self, f"{prefix}_adicao_menu").config(state='readonly')
+            getattr(self, f"{prefix}_cilindrico_menu").config(state='readonly')
+        
         self.armacao_var.set('Não')
         self.resultado_label.config(text='')
-        self.esferico_menu['values'] = []
-        self.cilindrico_menu['values'] = []
-        self.adicao_menu['values'] = []
-        self.adicao_menu.config(state='readonly')
-        self.cilindrico_menu.config(state='readonly')
 
     def range_float(self, start, end, step=0.25):
         values = []
