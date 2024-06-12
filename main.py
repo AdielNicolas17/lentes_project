@@ -9,7 +9,7 @@ class LentesApp:
         self.sistema = SistemaLentes()
         self.root = root
         self.root.title("Calculadora de Lentes")
-        self.root.geometry("600x500")  # Aumentando o tamanho da janela
+        self.root.geometry("600x550")  # Aumentando o tamanho da janela
         self.root.configure(bg='#2F4F4F')  # Dark Green Background
         
         # Estilos
@@ -63,6 +63,19 @@ class LentesApp:
         self.adicao_var = tk.StringVar()
         self.adicao_menu = ttk.Combobox(self.frame, textvariable=self.adicao_var, state='readonly', width=40)
         self.adicao_menu.grid(row=4, column=1, padx=10, pady=10, sticky='w')
+        
+        # Incluir Armação
+        self.armacao_label = ttk.Label(self.frame, text="Incluir Armação")
+        self.armacao_label.grid(row=5, column=0, padx=10, pady=10, sticky='w')
+
+        self.armacao_frame = tk.Frame(self.frame, bg='#2F4F4F')
+        self.armacao_frame.grid(row=5, column=1, padx=10, pady=10, sticky='w')
+
+        self.armacao_var = tk.StringVar(value="Não")
+        self.armacao_sim = tk.Radiobutton(self.armacao_frame, text="Sim", variable=self.armacao_var, value="Sim", bg='#2F4F4F', fg='#FFD700', font=('Arial', 12))
+        self.armacao_nao = tk.Radiobutton(self.armacao_frame, text="Não", variable=self.armacao_var, value="Não", bg='#2F4F4F', fg='#FFD700', font=('Arial', 12))
+        self.armacao_sim.grid(row=0, column=0, padx=5)
+        self.armacao_nao.grid(row=0, column=1, padx=5)
         
         # Botões
         self.buttons_frame = tk.Frame(root, bg='#2F4F4F')
@@ -151,11 +164,16 @@ class LentesApp:
             categoria_key = "progressiva"
             cilindrico = None
 
-        tipo_lente = next((k for k, v in self.sistema.categorias[categoria_key].lentes.items() if v.nome == tipo_lente_nome), None)
+        tipo_lente = next((v for k, v in self.sistema.categorias[categoria_key].lentes.items() if v.nome == tipo_lente_nome), None)
 
         if tipo_lente is not None:
-            preco = self.sistema.categorias[categoria_key].obter_preco(tipo_lente, esferico, cilindrico, adicao)
-            self.resultado_label.config(text=preco)
+            preco_debito = (tipo_lente.debito + 40) * 3.5  # Aplicando a fórmula: valor + 40 e depois acrescido de 350%
+            preco_credito = (tipo_lente.credito + 40) * 4  # Aplicando a fórmula: valor da tabela + 40 e depois acrescido de 400%
+            if self.armacao_var.get() == "Sim":
+                preco_debito += 100.00
+                preco_credito += 110.00 
+            preco_text = f"Preço (Débito): R$ {preco_debito:.2f}, Preço (Crédito): R$ {preco_credito:.2f}"
+            self.resultado_label.config(text=preco_text)
         else:
             messagebox.showerror("Erro", "Tipo de lente não encontrado.")
     
@@ -165,6 +183,7 @@ class LentesApp:
         self.esferico_var.set('')
         self.cilindrico_var.set('')
         self.adicao_var.set('')
+        self.armacao_var.set('Não')
         self.resultado_label.config(text='')
         self.esferico_menu['values'] = []
         self.cilindrico_menu['values'] = []
