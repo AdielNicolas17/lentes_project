@@ -4,6 +4,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from models import SistemaLentes
 from business import CalculadoraPreco
+from lentes_project.sistema_lentes import SistemaLentes
 
 class LentesApp:
     def __init__(self, root):
