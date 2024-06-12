@@ -19,33 +19,33 @@ class LentesApp:
 
         # Molduras
         self.od_frame = tk.LabelFrame(root, text="OD", bg='#2F4F4F', fg='#FFD700', font=('Arial', 14, 'bold'), padx=20, pady=20)
-        self.od_frame.place(x=50, y=20, width=400, height=300)
+        self.od_frame.place(x=50, y=20, width=425, height=300)
 
         self.oe_frame = tk.LabelFrame(root, text="OE", bg='#2F4F4F', fg='#FFD700', font=('Arial', 14, 'bold'), padx=20, pady=20)
-        self.oe_frame.place(x=550, y=20, width=400, height=300)
+        self.oe_frame.place(x=550, y=20, width=425, height=300)
 
         self.create_widgets(self.od_frame, 'od')
         self.create_widgets(self.oe_frame, 'oe')
 
         # Incluir Armação
         self.armacao_label = ttk.Label(root, text="Incluir Armação")
-        self.armacao_label.place(x=420, y=350)
+        self.armacao_label.place(x=50, y=350)
         self.armacao_var = tk.StringVar(value="Não")
         self.armacao_sim = tk.Radiobutton(root, text="Sim", variable=self.armacao_var, value="Sim", bg='#2F4F4F', fg='#FFD700', font=('Arial', 12))
         self.armacao_nao = tk.Radiobutton(root, text="Não", variable=self.armacao_var, value="Não", bg='#2F4F4F', fg='#FFD700', font=('Arial', 12))
-        self.armacao_sim.place(x=550, y=350)
-        self.armacao_nao.place(x=610, y=350)
+        self.armacao_sim.place(x=200, y=350)
+        self.armacao_nao.place(x=260, y=350)
         
         # Resultado
         self.resultado_label = ttk.Label(root, text="", font=("Arial", 14, "bold"))
-        self.resultado_label.place(x=420, y=380)
+        self.resultado_label.place(x=400, y=400)
 
         # Botões
         self.calcular_button = tk.Button(root, text="Calcular", command=self.calcular_preco, bg='#006400', fg='#FFD700', font=('Arial', 12, 'bold'))
-        self.calcular_button.place(x=420, y=420)
+        self.calcular_button.place(x=820, y=550)
 
         self.refazer_button = tk.Button(root, text="Refazer", command=self.resetar_opcoes, bg='#006400', fg='#FFD700', font=('Arial', 12, 'bold'))
-        self.refazer_button.place(x=530, y=420)
+        self.refazer_button.place(x=910, y=550)
 
     def create_widgets(self, frame, prefix):
         # Categorias
