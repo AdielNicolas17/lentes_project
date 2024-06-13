@@ -131,22 +131,23 @@ class LentesApp:
         setattr(self, f"{prefix}_adicao_menu", adicao_menu)
 
     def create_set_widgets(self, frame):
-        # Incluir Armação
-        armacao_label = ttk.Label(frame, text="Incluir Armação")
-        armacao_label.grid(row=0, column=0, padx=(10, 0), pady=10, sticky='w')
-        self.armacao_var = tk.StringVar(value="Não")
-        armacao_sim = tk.Radiobutton(frame, text="Sim", variable=self.armacao_var, value="Sim", bg='#2F4F4F', fg='#FFD700', font=('Arial', 12))
-        armacao_nao = tk.Radiobutton(frame, text="Não", variable=self.armacao_var, value="Não", bg='#2F4F4F', fg='#FFD700', font=('Arial', 12))
-        armacao_sim.grid(row=0, column=1, padx=(3, 10), pady=10, sticky='w')
-        armacao_nao.grid(row=0, column=2, padx=(3, 10), pady=10, sticky='w')
-
+        
         # Margem
         margem_label = ttk.Label(frame, text="Margem")
-        margem_label.grid(row=1, column=0, padx=(10, 0), pady=10, sticky='w')
+        margem_label.grid(row=0, column=0, padx=(10, 0), pady=10, sticky='w')
         self.margem_var = tk.StringVar()
         margem_menu = ttk.Combobox(frame, textvariable=self.margem_var, state='readonly', width=10)  # Ajuste de largura
         margem_menu['values'] = ["250%", "300%", "350%", "400%"]
-        margem_menu.grid(row=1, column=1, padx=(3, 10), pady=10, sticky='w')
+        margem_menu.grid(row=0, column=1, padx=(3, 10), pady=10, sticky='w')
+        
+        # Incluir Armação
+        armacao_label = ttk.Label(frame, text="Incluir Armação")
+        armacao_label.grid(row=1, column=0, padx=(10, 0), pady=10, sticky='w')
+        self.armacao_var = tk.StringVar(value="Não")
+        armacao_sim = tk.Radiobutton(frame, text="Sim", variable=self.armacao_var, value="Sim", bg='#2F4F4F', fg='#FFD700', font=('Arial', 12))
+        armacao_nao = tk.Radiobutton(frame, text="Não", variable=self.armacao_var, value="Não", bg='#2F4F4F', fg='#FFD700', font=('Arial', 12))
+        armacao_sim.grid(row=1, column=1, padx=(3, 10), pady=10, sticky='w')
+        armacao_nao.grid(row=1, column=2, padx=(3, 10), pady=10, sticky='w')
 
         # Consulta
         consulta_label = ttk.Label(frame, text="Incluir Consulta")
