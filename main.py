@@ -1,5 +1,7 @@
 # main.py
 
+
+
 import tkinter as tk
 from ui import LentesApp
 from lentes_project.sistema_lentes import SistemaLentes

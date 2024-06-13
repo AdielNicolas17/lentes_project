@@ -11,43 +11,65 @@ class LentesApp:
         self.sistema = SistemaLentes()
         self.root = root
         self.root.title("Calculadora de Lentes")
-        self.root.geometry("1000x600")  # Ajustando o tamanho da janela
+        self.root.geometry("1000x640")  # Ajustando o tamanho da janela
         self.root.configure(bg='#2F4F4F')  # Dark Green Background
 
         # Estilos
         self.style = ttk.Style()
         self.style.configure('TLabel', background='#2F4F4F', foreground='#FFD700', font=('Arial', 12))
-        self.style.configure('TCombobox', font=('Arial', 12))
+        self.style.configure('TCombobox', fieldbackground='#2F4F4F', background='#2F4F4F', foreground='#000000', font=('Arial', 12))
 
-        # Molduras
-        self.od_frame = tk.LabelFrame(root, text="OD", bg='#2F4F4F', fg='#FFD700', font=('Arial', 14, 'bold'), padx=20, pady=20)
+        # Criação do Notebook
+        self.notebook = ttk.Notebook(root)
+        self.notebook.pack(expand=True, fill='both')
+
+        # Frame da aba principal
+        self.main_frame = tk.Frame(self.notebook, bg='#2F4F4F')
+        self.notebook.add(self.main_frame, text="Calculadora de Lentes")
+
+        # Frame da nova aba
+        self.new_tab_frame = tk.Frame(self.notebook, bg='#2F4F4F')
+        self.notebook.add(self.new_tab_frame, text="Nova Aba")
+
+        # Adicionando widgets na aba principal
+        self.create_main_tab_widgets()
+
+        # Adicionando widgets na nova aba
+        self.create_new_tab_widgets()
+
+    def create_main_tab_widgets(self):
+        # Molduras na aba principal
+        self.od_frame = tk.LabelFrame(self.main_frame, text="OD", bg='#2F4F4F', fg='#FFD700', font=('Arial', 14, 'bold'), padx=20, pady=20)
         self.od_frame.place(x=50, y=20, width=400, height=300)
 
-        self.oe_frame = tk.LabelFrame(root, text="OE", bg='#2F4F4F', fg='#FFD700', font=('Arial', 14, 'bold'), padx=20, pady=20)
+        self.oe_frame = tk.LabelFrame(self.main_frame, text="OE", bg='#2F4F4F', fg='#FFD700', font=('Arial', 14, 'bold'), padx=20, pady=20)
         self.oe_frame.place(x=550, y=20, width=400, height=300)
+
+        self.set_frame = tk.LabelFrame(self.main_frame, text="SET", bg='#2F4F4F', fg='#FFD700', font=('Arial', 14, 'bold'), padx=20, pady=20)
+        self.set_frame.place(x=50, y=330, width=400, height=200)
 
         self.create_widgets(self.od_frame, 'od')
         self.create_widgets(self.oe_frame, 'oe')
+        self.create_set_widgets(self.set_frame)
 
-        # Incluir Armação
-        self.armacao_label = ttk.Label(root, text="Incluir Armação")
-        self.armacao_label.place(x=50, y=350)
-        self.armacao_var = tk.StringVar(value="Não")
-        self.armacao_sim = tk.Radiobutton(root, text="Sim", variable=self.armacao_var, value="Sim", bg='#2F4F4F', fg='#FFD700', font=('Arial', 12))
-        self.armacao_nao = tk.Radiobutton(root, text="Não", variable=self.armacao_var, value="Não", bg='#2F4F4F', fg='#FFD700', font=('Arial', 12))
-        self.armacao_sim.place(x=200, y=350)
-        self.armacao_nao.place(x=260, y=350)
-        
         # Resultado
-        self.resultado_label = ttk.Label(root, text="", font=("Arial", 14, "bold"))
-        self.resultado_label.place(relx=0.5, rely=0.7, anchor=tk.CENTER)
+        self.resultado_debito_label = ttk.Label(self.main_frame, text="", font=("Arial", 14, "bold"))
+        self.resultado_debito_label.place(x=550, y=350)
+
+        self.resultado_credito_label = ttk.Label(self.main_frame, text="", font=("Arial", 14, "bold"))
+        self.resultado_credito_label.place(x=550, y=380)
 
         # Botões
-        self.calcular_button = tk.Button(root, text="Calcular", command=self.calcular_preco, bg='#006400', fg='#FFD700', font=('Arial', 12, 'bold'))
+        self.calcular_button = tk.Button(self.main_frame, text="Calcular", command=self.calcular_preco, bg='#006400', fg='#FFD700', font=('Arial', 12, 'bold'))
         self.calcular_button.place(x=790, y=550)
 
-        self.refazer_button = tk.Button(root, text="Refazer", command=self.resetar_opcoes, bg='#006400', fg='#FFD700', font=('Arial', 12, 'bold'))
+        self.refazer_button = tk.Button(self.main_frame, text="Refazer", command=self.resetar_opcoes, bg='#006400', fg='#FFD700', font=('Arial', 12, 'bold'))
         self.refazer_button.place(x=890, y=550)  # margem de 5 mm da borda direita
+
+    def create_new_tab_widgets(self):
+        # Adicione os widgets específicos para a nova aba aqui
+        new_tab_label = ttk.Label(self.new_tab_frame, text="Bem-vindo à Nova Aba!", font=("Arial", 16), background='#2F4F4F', foreground='#FFD700')
+        new_tab_label.pack(pady=20)
 
     def create_widgets(self, frame, prefix):
         # Categorias
@@ -107,6 +129,33 @@ class LentesApp:
 
         setattr(self, f"{prefix}_adicao_var", adicao_var)
         setattr(self, f"{prefix}_adicao_menu", adicao_menu)
+
+    def create_set_widgets(self, frame):
+        # Incluir Armação
+        armacao_label = ttk.Label(frame, text="Incluir Armação")
+        armacao_label.grid(row=0, column=0, padx=(10, 0), pady=10, sticky='w')
+        self.armacao_var = tk.StringVar(value="Não")
+        armacao_sim = tk.Radiobutton(frame, text="Sim", variable=self.armacao_var, value="Sim", bg='#2F4F4F', fg='#FFD700', font=('Arial', 12))
+        armacao_nao = tk.Radiobutton(frame, text="Não", variable=self.armacao_var, value="Não", bg='#2F4F4F', fg='#FFD700', font=('Arial', 12))
+        armacao_sim.grid(row=0, column=1, padx=(3, 10), pady=10, sticky='w')
+        armacao_nao.grid(row=0, column=2, padx=(3, 10), pady=10, sticky='w')
+
+        # Margem
+        margem_label = ttk.Label(frame, text="Margem")
+        margem_label.grid(row=1, column=0, padx=(10, 0), pady=10, sticky='w')
+        self.margem_var = tk.StringVar()
+        margem_menu = ttk.Combobox(frame, textvariable=self.margem_var, state='readonly', width=10)  # Ajuste de largura
+        margem_menu['values'] = ["250%", "300%", "350%", "400%"]
+        margem_menu.grid(row=1, column=1, padx=(3, 10), pady=10, sticky='w')
+
+        # Consulta
+        consulta_label = ttk.Label(frame, text="Incluir Consulta")
+        consulta_label.grid(row=2, column=0, padx=(10, 0), pady=10, sticky='w')
+        self.consulta_var = tk.StringVar(value="Não")
+        consulta_sim = tk.Radiobutton(frame, text="Sim", variable=self.consulta_var, value="Sim", bg='#2F4F4F', fg='#FFD700', font=('Arial', 12))
+        consulta_nao = tk.Radiobutton(frame, text="Não", variable=self.consulta_var, value="Não", bg='#2F4F4F', fg='#FFD700', font=('Arial', 12))
+        consulta_sim.grid(row=2, column=1, padx=(3, 10), pady=10, sticky='w')
+        consulta_nao.grid(row=2, column=2, padx=(3, 10), pady=10, sticky='w')
 
     def update_tipos_lentes(self, event, prefix):
         categoria = getattr(self, f"{prefix}_categoria_var").get()
@@ -173,10 +222,11 @@ class LentesApp:
             if not od_tipo_lente or not oe_tipo_lente:
                 raise ValueError("Tipo de lente não encontrado.")
 
-            preco_debito, preco_credito = CalculadoraPreco.calcular_preco(od_tipo_lente, oe_tipo_lente, self.armacao_var.get())
+            margem = float(self.margem_var.get().strip('%')) / 100
+            preco_debito, preco_credito = CalculadoraPreco.calcular_preco(od_tipo_lente, oe_tipo_lente, self.armacao_var.get(), margem, self.consulta_var.get())
 
-            preco_text = f"Preço (Débito): R$ {preco_debito:.2f}, Preço (Crédito): R$ {preco_credito:.2f}"
-            self.resultado_label.config(text=preco_text)
+            self.resultado_debito_label.config(text=f"A VISTA: R$ {preco_debito:.2f}")
+            self.resultado_credito_label.config(text=f"CREDITO: R$ {preco_credito:.2f}")
         except Exception as e:
             messagebox.showerror("Erro", str(e))
     
@@ -194,7 +244,10 @@ class LentesApp:
             getattr(self, f"{prefix}_cilindrico_menu").config(state='readonly')
         
         self.armacao_var.set('Não')
-        self.resultado_label.config(text='')
+        self.margem_var.set('')
+        self.consulta_var.set('Não')
+        self.resultado_debito_label.config(text='')
+        self.resultado_credito_label.config(text='')
 
     def range_float(self, start, end, step=0.25):
         values = []
