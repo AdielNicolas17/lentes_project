@@ -5,19 +5,27 @@ from tkinter import ttk, messagebox
 from models import SistemaLentes
 from business import CalculadoraPreco
 from lentes_project.sistema_lentes import SistemaLentes
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+import tempfile
+import os
+import subprocess
+import webbrowser
 
 class LentesApp:
     def __init__(self, root):
         self.sistema = SistemaLentes()
         self.root = root
         self.root.title("Calculadora de Lentes")
-        self.root.geometry("1000x640")  # Ajustando o tamanho da janela
+        self.root.geometry("1200x600")  # Ajustando o tamanho da janela
         self.root.configure(bg='#2F4F4F')  # Dark Green Background
 
         # Estilos
         self.style = ttk.Style()
         self.style.configure('TLabel', background='#2F4F4F', foreground='#FFD700', font=('Arial', 12))
         self.style.configure('TCombobox', fieldbackground='#2F4F4F', background='#2F4F4F', foreground='#000000', font=('Arial', 12))
+        self.style.configure('Treeview', background='#2F4F4F', foreground='#FFD700', rowheight=25, fieldbackground='#2F4F4F')
+        self.style.configure('Treeview.Heading', background='#2F4F4F', foreground='#FFD700', font=('Arial', 12, 'bold'))
 
         # Criação do Notebook
         self.notebook = ttk.Notebook(root)
@@ -27,15 +35,15 @@ class LentesApp:
         self.main_frame = tk.Frame(self.notebook, bg='#2F4F4F')
         self.notebook.add(self.main_frame, text="Calculadora de Lentes")
 
-        # Frame da nova aba
-        self.new_tab_frame = tk.Frame(self.notebook, bg='#2F4F4F')
-        self.notebook.add(self.new_tab_frame, text="Nova Aba")
+        # Frame da aba de detalhamento
+        self.detail_frame = tk.Frame(self.notebook, bg='#2F4F4F')
+        self.notebook.add(self.detail_frame, text="Detalhamento")
 
         # Adicionando widgets na aba principal
         self.create_main_tab_widgets()
 
-        # Adicionando widgets na nova aba
-        self.create_new_tab_widgets()
+        # Adicionando widgets na aba de detalhamento
+        self.create_detail_tab_widgets()
 
     def create_main_tab_widgets(self):
         # Molduras na aba principal
@@ -66,10 +74,34 @@ class LentesApp:
         self.refazer_button = tk.Button(self.main_frame, text="Refazer", command=self.resetar_opcoes, bg='#006400', fg='#FFD700', font=('Arial', 12, 'bold'))
         self.refazer_button.place(x=890, y=550)  # margem de 5 mm da borda direita
 
-    def create_new_tab_widgets(self):
-        # Adicione os widgets específicos para a nova aba aqui
-        new_tab_label = ttk.Label(self.new_tab_frame, text="Bem-vindo à Nova Aba!", font=("Arial", 16), background='#2F4F4F', foreground='#FFD700')
-        new_tab_label.pack(pady=20)
+    def create_detail_tab_widgets(self):
+        # Moldura para a planilha
+        self.detail_frame_inner = tk.LabelFrame(self.detail_frame, text="Planilha Financeira", bg='#2F4F4F', fg='#FFD700', font=('Arial', 14, 'bold'), padx=10, pady=10)
+        self.detail_frame_inner.pack(expand=True, fill='both', padx=20, pady=20)
+
+        # Configurar colunas da planilha
+        self.tree = ttk.Treeview(self.detail_frame_inner, columns=("produto", "valor_lente", "custo", "margem", "renda_liquida"), show='headings')
+        self.tree.heading("produto", text="Produto")
+        self.tree.heading("valor_lente", text="Valor da Lente")
+        self.tree.heading("custo", text="Custo")
+        self.tree.heading("margem", text="Margem")
+        self.tree.heading("renda_liquida", text="Renda Líquida")
+
+        self.tree.column("produto", anchor='center', width=200)
+        self.tree.column("valor_lente", anchor='center', width=150)
+        self.tree.column("custo", anchor='center', width=100)
+        self.tree.column("margem", anchor='center', width=100)
+        self.tree.column("renda_liquida", anchor='center', width=200)
+
+        self.tree.pack(expand=True, fill='both')
+
+        # Add grid lines
+        self.tree.tag_configure('evenrow', background='#3E3E3E')
+        self.tree.tag_configure('oddrow', background='#2F4F4F')
+
+        # Botão de imprimir
+        self.imprimir_button = tk.Button(self.detail_frame, text="Imprimir", command=self.imprimir, bg='#006400', fg='#FFD700', font=('Arial', 12, 'bold'))
+        self.imprimir_button.pack(pady=10)
 
     def create_widgets(self, frame, prefix):
         # Categorias
@@ -131,23 +163,22 @@ class LentesApp:
         setattr(self, f"{prefix}_adicao_menu", adicao_menu)
 
     def create_set_widgets(self, frame):
-        
-        # Margem
-        margem_label = ttk.Label(frame, text="Margem")
-        margem_label.grid(row=0, column=0, padx=(10, 0), pady=10, sticky='w')
-        self.margem_var = tk.StringVar()
-        margem_menu = ttk.Combobox(frame, textvariable=self.margem_var, state='readonly', width=10)  # Ajuste de largura
-        margem_menu['values'] = ["250%", "300%", "350%", "400%"]
-        margem_menu.grid(row=0, column=1, padx=(3, 10), pady=10, sticky='w')
-        
         # Incluir Armação
         armacao_label = ttk.Label(frame, text="Incluir Armação")
-        armacao_label.grid(row=1, column=0, padx=(10, 0), pady=10, sticky='w')
+        armacao_label.grid(row=0, column=0, padx=(10, 0), pady=10, sticky='w')
         self.armacao_var = tk.StringVar(value="Não")
         armacao_sim = tk.Radiobutton(frame, text="Sim", variable=self.armacao_var, value="Sim", bg='#2F4F4F', fg='#FFD700', font=('Arial', 12))
         armacao_nao = tk.Radiobutton(frame, text="Não", variable=self.armacao_var, value="Não", bg='#2F4F4F', fg='#FFD700', font=('Arial', 12))
-        armacao_sim.grid(row=1, column=1, padx=(3, 10), pady=10, sticky='w')
-        armacao_nao.grid(row=1, column=2, padx=(3, 10), pady=10, sticky='w')
+        armacao_sim.grid(row=0, column=1, padx=(3, 10), pady=10, sticky='w')
+        armacao_nao.grid(row=0, column=2, padx=(3, 10), pady=10, sticky='w')
+
+        # Margem
+        margem_label = ttk.Label(frame, text="Margem")
+        margem_label.grid(row=1, column=0, padx=(10, 0), pady=10, sticky='w')
+        self.margem_var = tk.StringVar()
+        margem_menu = ttk.Combobox(frame, textvariable=self.margem_var, state='readonly', width=10)  # Ajuste de largura
+        margem_menu['values'] = ["250%", "300%", "350%", "400%"]
+        margem_menu.grid(row=1, column=1, padx=(3, 10), pady=10, sticky='w')
 
         # Consulta
         consulta_label = ttk.Label(frame, text="Incluir Consulta")
@@ -228,9 +259,30 @@ class LentesApp:
 
             self.resultado_debito_label.config(text=f"A VISTA: R$ {preco_debito:.2f}")
             self.resultado_credito_label.config(text=f"CREDITO: R$ {preco_credito:.2f}")
+
+            # Atualizar a planilha na aba de detalhamento
+            self.update_detail_tab(od_tipo_lente, oe_tipo_lente, margem, self.armacao_var.get())
         except Exception as e:
             messagebox.showerror("Erro", str(e))
     
+    def update_detail_tab(self, od_tipo_lente, oe_tipo_lente, margem, incluir_armacao):
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+
+        produtos = [
+            ("Lente OD", od_tipo_lente.debito / 2, od_tipo_lente.debito, margem),
+            ("Lente OE", oe_tipo_lente.debito / 2, oe_tipo_lente.debito, margem),
+            ("Montagem", 30.00, 30.00, 0.4)  # Valor fixo para montagem e margem fixa de 40%
+        ]
+
+        if incluir_armacao == "Sim":
+            produtos.append(("Armação", 100.00, 100.00, 0.4))  # Margem fixa de 40%
+
+        for i, (produto, valor_lente, custo, margem) in enumerate(produtos):
+            renda_liquida = custo * margem
+            tag = 'evenrow' if i % 2 == 0 else 'oddrow'
+            self.tree.insert('', 'end', values=(produto, f"R$ {valor_lente:.2f}", f"R$ {custo:.2f}", f"{margem * 100:.0f}%", f"R$ {renda_liquida:.2f}"), tags=(tag,))
+
     def resetar_opcoes(self):
         for prefix in ["od", "oe"]:
             getattr(self, f"{prefix}_categoria_var").set('')
@@ -250,9 +302,44 @@ class LentesApp:
         self.resultado_debito_label.config(text='')
         self.resultado_credito_label.config(text='')
 
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+
     def range_float(self, start, end, step=0.25):
         values = []
         while start <= end:
             values.append(round(start, 2))
             start += step
         return values
+    
+    def imprimir(self):
+        # Create a temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_file:
+            c = canvas.Canvas(tmp_file.name, pagesize=A4)
+            width, height = A4
+
+            # Set the title and styles
+            c.setFont("Helvetica-Bold", 16)
+            c.drawString(100, height - 50, "Detalhamento Financeiro")
+
+            c.setFont("Helvetica", 12)
+            x_offset = 50
+            y_offset = height - 100
+            line_height = 20
+
+            # Draw the table headers
+            headers = ["Produto", "Valor da Lente", "Custo", "Margem", "Renda Líquida"]
+            for i, header in enumerate(headers):
+                c.drawString(x_offset + i*120, y_offset, header)
+
+            # Draw the table content
+            for i, row in enumerate(self.tree.get_children()):
+                y_offset -= line_height
+                item = self.tree.item(row)['values']
+                for j, value in enumerate(item):
+                    c.drawString(x_offset + j*120, y_offset, str(value))
+
+            c.save()
+
+        # Open the PDF with the default application
+        webbrowser.open(tmp_file.name)
